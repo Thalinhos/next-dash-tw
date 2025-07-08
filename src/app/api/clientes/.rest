@@ -1,0 +1,42 @@
+### Listar todos os clientes (GET /api/clients)
+GET http://localhost:3000/api/clientes
+
+
+
+### Obter cliente por ID (GET /api/clients/:id)
+GET http://localhost:3000/api/clientes/686d51b82c17c296c4ee35c8
+
+
+
+### Criar novo cliente (POST /api/clients)
+POST http://localhost:3000/api/clientes 
+
+{
+  "name": "João Silva",
+  "company": "Empresa X",
+  "email": "joao.silva@example.com",
+  "phone": "123456789",
+  "address": "Rua das Flores, 123",
+  "notes": "Cliente VIP"
+}
+
+
+### Atualizar cliente (PUT /api/clients/:id)
+PUT http://localhost:3000/api/clientes/686d51b82c17c296c4ee35c8
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: application/json
+
+{
+  "phone": "987654321",
+  "notes": "Atualizado em 2025"
+}
+
+
+### Desativar cliente (DELETE /api/clients/:id)
+DELETE http://localhost:3000/api/clientes/686d51b82c17c296c4ee35c8
+
+
+
+### Reativar cliente (PUT /api/clients/reactivate/:id)
+PUT http://localhost:3000/api/clientes/reactivate/686d51b82c17c296c4ee35c8
+

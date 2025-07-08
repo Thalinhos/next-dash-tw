@@ -1,0 +1,14 @@
+{
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/next-env.d.ts": true,
+    "**/next.config.ts": true,
+    "**/tsconfig.json": true,
+    "**/postcss.config.mjs": true,
+    "**/package-lock.json": true,
+    "**/README.md": true,
+    "**/components.json": true,
+    ".gitignore": true
+  }
+}

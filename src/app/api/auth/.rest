@@ -1,0 +1,16 @@
+### LOGIN - obter token e setar cookie
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "thalissonborgesvieira@gmail.com",
+  "password": "admin123"
+}
+
+### VERIFICAR TOKEN
+GET http://localhost:3000/api/auth/verify
+
+
+### LOGOUT - remove cookie
+POST http://localhost:3000/api/auth/logout
+
