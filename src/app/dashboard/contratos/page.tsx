@@ -1,9 +1,10 @@
-export default function Contratos(){
-    return (
+import ContractManagement from "./components/contract-management";
 
-        <>
-            Gerencie seus Contratos
-        </>
 
-    )
+export default function ContractsPage() {
+  return (
+    <div className="container mx-auto py-8">
+      <ContractManagement />
+    </div>
+  )
 }
