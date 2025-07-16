@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from "mongodb";
 import { getClientCollection } from '@/utils/mongodb';
 
- export function parseId(id: string) {
+function parseId(id: string) {
     try {
       return new ObjectId(id);
     } catch {
@@ -10,7 +10,7 @@ import { getClientCollection } from '@/utils/mongodb';
     }
   }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: any ) {
 
   const paramBody = await params;
   const id = parseId(paramBody.id);
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json(client);
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: any) {
 
   const paramBody = await params;
   const id = parseId(paramBody.id);
@@ -39,7 +39,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json({ modifiedCount: result.modifiedCount });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: any ) {
 
    const paramBody = await params;
   const id = parseId(paramBody.id);
