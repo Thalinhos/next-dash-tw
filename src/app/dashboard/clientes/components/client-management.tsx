@@ -1,10 +1,11 @@
-'use client'
+"use client"
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, RotateCcw, Eye } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Plus, Edit, Trash2, RotateCcw, Eye, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { ClientForm } from "./client-form"
 import { ClientDetails } from "./client-details"
 import { DeleteConfirmDialog } from "./delete-confirm-dialog"
@@ -23,6 +24,13 @@ export interface Client {
   updatedAt?: string
 }
 
+interface PaginationInfo {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
 export default function ClientManagement() {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
@@ -31,25 +39,28 @@ export default function ClientManagement() {
   const [showDetails, setShowDetails] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [editingClient, setEditingClient] = useState<Client | null>(null)
-
-  const [page, setPage] = useState<number>(1)
-  const limit = 5
-
-  const [pagination, setPagination] = useState<{
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  } | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    total: 0,
+    page: 1,
+    limit: 5,
+    totalPages: 0,
+  })
 
   useEffect(() => {
     fetchClients()
-  }, [page])
+  }, [pagination.page, searchQuery])
 
   const fetchClients = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/clientes?page=${page}&limit=${limit}`)
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        ...(searchQuery && { q: searchQuery }),
+      })
+
+      const response = await fetch(`/api/clientes?${params}`)
       if (response.ok) {
         const data = await response.json()
         setClients(data.data)
@@ -71,7 +82,6 @@ export default function ClientManagement() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(clientData),
       })
-
       if (response.ok) {
         toast("Cliente criado com sucesso")
         fetchClients()
@@ -86,14 +96,12 @@ export default function ClientManagement() {
 
   const handleUpdateClient = async (clientData: Omit<Client, "_id">) => {
     if (!editingClient) return
-
     try {
       const response = await fetch(`/api/clientes/${editingClient._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(clientData),
       })
-
       if (response.ok) {
         toast("Cliente atualizado com sucesso")
         fetchClients()
@@ -112,7 +120,6 @@ export default function ClientManagement() {
       const response = await fetch(`/api/clientes/${clientId}`, {
         method: "DELETE",
       })
-
       if (response.ok) {
         toast("Cliente desativado com sucesso")
         fetchClients()
@@ -129,7 +136,6 @@ export default function ClientManagement() {
       const response = await fetch(`/api/clientes/reactivate/${clientId}`, {
         method: "PUT",
       })
-
       if (response.ok) {
         toast("Cliente reativado com sucesso")
         fetchClients()
@@ -161,7 +167,16 @@ export default function ClientManagement() {
     setShowDeleteDialog(true)
   }
 
-  if (loading) {
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    setPagination((prev) => ({ ...prev, page: 1 }))
+  }
+
+  const handlePageChange = (newPage: number) => {
+    setPagination((prev) => ({ ...prev, page: newPage }))
+  }
+
+  if (loading && clients.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-lg">Carregando clientes...</div>
@@ -170,7 +185,7 @@ export default function ClientManagement() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Gerenciamento de Clientes</h1>
@@ -182,11 +197,29 @@ export default function ClientManagement() {
         </Button>
       </div>
 
+      {/* Barra de Busca */}
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar clientes..."
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        <div className="text-sm text-muted-foreground">
+          {pagination.total} cliente{pagination.total !== 1 ? "s" : ""} encontrado{pagination.total !== 1 ? "s" : ""}
+        </div>
+      </div>
+
       <div className="grid gap-4">
         {clients.length === 0 ? (
           <Card>
             <CardContent className="flex items-center justify-center h-32">
-              <p className="text-muted-foreground">Nenhum cliente encontrado</p>
+              <p className="text-muted-foreground">
+                {searchQuery ? "Nenhum cliente encontrado para sua busca" : "Nenhum cliente encontrado"}
+              </p>
             </CardContent>
           </Card>
         ) : (
@@ -245,6 +278,35 @@ export default function ClientManagement() {
         )}
       </div>
 
+      {/* Paginação Melhorada */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Página {pagination.page} de {pagination.totalPages}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={pagination.page >= pagination.totalPages}
+            >
+              Próxima
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Modais */}
       <ClientForm
         open={showForm}
@@ -267,31 +329,6 @@ export default function ClientManagement() {
         }}
         clientName={selectedClient?.name || ""}
       />
-
-      {/* Paginação */}
-      {pagination && (
-        <div className="flex justify-center gap-4 mt-6">
-          <Button
-            variant="outline"
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-            disabled={pagination.page <= 1}
-          >
-            Anterior
-          </Button>
-
-          <span className="flex items-center">
-            Página {pagination.page} de {pagination.totalPages}
-          </span>
-
-          <Button
-            variant="outline"
-            onClick={() => setPage((prev) => Math.min(prev + 1, pagination.totalPages))}
-            disabled={pagination.page >= pagination.totalPages}
-          >
-            Próxima
-          </Button>
-        </div>
-      )}
     </div>
   )
 }

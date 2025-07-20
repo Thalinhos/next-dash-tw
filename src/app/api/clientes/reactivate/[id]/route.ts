@@ -2,7 +2,7 @@ import { getClientCollection } from '@/utils/mongodb';
 import { ObjectId } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 
- export function parseId(id: string) {
+function parseId(id: string) {
     try {
       return new ObjectId(id);
     } catch {
@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
     }
   }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: any ) {
   const paramsBody = await params;
   const id = parseId(paramsBody.id);
   if (!id) return NextResponse.json({ error: 'ID inválido' }, { status: 400 });

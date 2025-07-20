@@ -9,6 +9,10 @@
     "**/package-lock.json": true,
     "**/README.md": true,
     "**/components.json": true,
-    ".gitignore": true
+    ".gitignore": true,
+    "**/src/components" : true,
+    "**/src/hooks" : true,
+    "**/src/lib" : true,
+    "**/src/app/globals.css": true
   }
 }
